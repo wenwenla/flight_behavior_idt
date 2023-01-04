@@ -15,9 +15,9 @@ class RNN(torch.nn.Module):
 
     def __init__(self) -> None:
         super().__init__()
-        self.rnn_layear = torch.nn.LSTM(input_size=20, hidden_size=128, batch_first=True)
+        self.rnn_layear = torch.nn.LSTM(input_size=30, hidden_size=128, batch_first=True)
         self.fc0 = torch.nn.Linear(128, 128)
-        self.fc1 = torch.nn.Linear(128, 10)
+        self.fc1 = torch.nn.Linear(128, 11)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -39,19 +39,20 @@ class FBDataSet(Dataset):
         self.rb = rb
         
     def __len__(self):
-        return 10 * (self.rb - self.lb)
+        return 11 * (self.rb - self.lb)
 
     def __getitem__(self, idx):
         L = (self.rb - self.lb)
         label = idx // L
-        bn = ['cppds', 'defenseds', 'flockingds', 'formation', 'hideds', 'leaderfollowers', 'lineds', 'patrol', 'poi', 'treesds2'][label]
+        bn = ['cppds', 'defenseds2', 'flockingds', 'formation', 'hideds', 'leaderfollowers_3d', 'lineds',
+         'patrol', 'pass3d', 'poi', 'treesds2'][label]
         pkl_index = idx %  L + self.lb
-        fn = f'./mean_std_ds/{bn}/{pkl_index}.pkl'
+        fn = f'./new_3d_normalized/{bn}/{pkl_index}.pkl'
         # print(idx, fn, label)
         with open(fn, 'rb') as fin:
             data = pickle.load(fin)
         L_S = np.random.randint(0, data.shape[0] - self.split_index - 1)
-        data = data[L_S:L_S + self.split_index, :10, :].reshape(-1, 20)
+        data = data[L_S:L_S + self.split_index, :10, :].reshape(-1, 30)
         return data.astype('float32'), label
 
 
@@ -64,7 +65,7 @@ def setup_seed(seed):
 
 
 def main():
-    N = 20
+    N = 15
     # --- fix randomness ---
     setup_seed(19971023)
     # --- fix randomness ---
@@ -98,7 +99,7 @@ def main():
         # if episode < 40:
         #     continue
         # eval
-        if episode > 90:
+        if episode > 0:
             correct = 0
             total = 0
             for test_batch in eval_dl:
@@ -116,7 +117,7 @@ def main():
 
 
 def evaluation():
-    N = 20
+    N = 15
     ds_eval = FBDataSet(N, 8000, 10000)
     ds_loader = DataLoader(ds_eval, 2000 * 10)
     net = RNN().to(DEVICE)
@@ -144,5 +145,5 @@ def evaluation():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     evaluation()

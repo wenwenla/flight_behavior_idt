@@ -2,3 +2,5 @@
 dataset/**
 state_dict**/**
 mean_std_ds/**
+new_3d/**
+new_3d_normalized/**

@@ -23,7 +23,7 @@ class CNNModule(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(256, 128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 10)
+        self.fc3 = nn.Linear(64, 11)
 
     def forward(self, x):
         x = self.pool(torch.relu(self.conv1(x)))
@@ -44,14 +44,14 @@ class FBImageDataset(Dataset):
         self.rb = rb
 
     def __len__(self):
-        return 10 * (self.rb - self.lb)
+        return 11 * (self.rb - self.lb)
 
     def __getitem__(self, idx):
         L = (self.rb - self.lb)
         label = idx // L
-        bn = ['cppds', 'defenseds', 'flockingds', 'formation', 'hideds', 'leaderfollowers', 'lineds', 'patrol', 'poi', 'treesds2'][label]
+        bn = ['cppds', 'defenseds2', 'flockingds', 'formation', 'hideds', 'leaderfollowers_3d', 'lineds', 'pass3d', 'patrol', 'poi', 'treesds2'][label]
         pkl_index = idx %  L + self.lb
-        fn = f'./dataset/{bn}/{pkl_index}.jpg'
+        fn = f'./new_3d/{bn}/{pkl_index}.jpg'
         image = read_image(fn)
         if self.transform:
             image = self.transform(image)
@@ -84,7 +84,7 @@ def main():
     opt = optim.Adam(net.parameters())
     loss_fn = nn.CrossEntropyLoss()
 
-    for episode in range(10):
+    for episode in range(5):
         total_loss = 0
         for batch in tqdm(train_dl):
             images, labels = batch
@@ -123,7 +123,7 @@ def evaluation():
     ds_eval = FBImageDataset(8000, 10000, transformer)
     ds_loader = DataLoader(ds_eval, 2000 * 10)
     net = CNNModule().to(DEVICE)
-    net.load_state_dict(torch.load(f'./state_dict_img/model_EP9.sd'))
+    net.load_state_dict(torch.load(f'./state_dict_img/model_EP4.sd'))
     pred = []
     real_label = []
     for d in ds_loader:
@@ -147,5 +147,5 @@ def evaluation():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     evaluation()
