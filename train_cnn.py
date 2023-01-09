@@ -174,7 +174,7 @@ def eval_real_data():
         ConvertImageDtype(torch.float),
         Normalize(0, 1),
     ])
-    ds = MixedImageDataset('real_pass/mixed', 7, transformer)
+    ds = MixedImageDataset('real_trees/mixed', 10, transformer)
     ds_loader = DataLoader(ds, 100)
     net = CNNModule().to(DEVICE)
     net.load_state_dict(torch.load(f'./state_dict_img/model_EP4.sd'))

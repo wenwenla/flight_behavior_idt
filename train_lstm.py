@@ -177,7 +177,10 @@ def eval_real_data():
     N = 15
     mean = [8.07585196, 4.89015749, 1.07418603] 
     std = [3.85663151, 1.94566411, 0.34342566]
-    ds_eval = MixedSeqDataset('real_pass/mixed', 8, N, [mean, std])
+
+    mean = [27.2549865, 16.41504084, 0.        ] 
+    std = [15.03331502, 10.08243792, 1.        ]
+    ds_eval = MixedSeqDataset('real_trees/mixed', 10, N, [mean, std])
     ds_loader = DataLoader(ds_eval, 100)
     net = RNN().to(DEVICE)
     net.load_state_dict(torch.load(f'./state_dict_{N}/model_EP99_{N}.sd'))
