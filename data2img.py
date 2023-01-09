@@ -50,6 +50,7 @@ def data_processing(folder):
         print(i, min_vals, max_vals)
 
         data = (data - min_vals) / (max_vals - min_vals)
+        print(data.shape)
         img = Image.new('L', (W, W))
         drawer = ImageDraw.Draw(img)
 
