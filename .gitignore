@@ -5,3 +5,5 @@ mean_std_ds/**
 new_3d/**
 new_3d_normalized/**
 real_pass/**
+real_trees/**
+*.tar.gz
