@@ -10,7 +10,7 @@ def load_ds(fn):
     with open(fn, 'rb') as fin:
         data = pickle.load(fin)
     # print(data)
-    # sys.exit(-1)
+    # input('...')
     return data
 
 
@@ -18,8 +18,8 @@ def normalize_all(root, path, target):
     # _, path, fn = next(os.walk(root))
     # print(path)
     tmp = []
-    print('calc-mean-std...')
-    for i in trange(10000):
+    # print('calc-mean-std...')
+    for i in range(10000):
         data = load_ds(os.path.join(root, path, f'{i}.pkl'))
         tmp.extend(data)
     tmp = np.array(tmp)
@@ -27,17 +27,17 @@ def normalize_all(root, path, target):
     s = np.std(tmp, axis=(0, 1))
     if s[2] == 0.0:
         s[2] = 1.0
-    # print(path, m, s)
+    print(path, m, s)
     
     # print('save files...')
-    for i in trange(10000):
-        new_path = os.path.join(target, path)
-        if not os.path.exists(new_path):
-            os.makedirs(new_path)
-        data = load_ds(os.path.join(root, path, f'{i}.pkl'))
-        data = (data - m) / s
-        with open(os.path.join(new_path, f'{i}.pkl'), 'wb') as fout:
-            pickle.dump(data, fout)
+    # for i in trange(10000):
+    #     new_path = os.path.join(target, path)
+    #     if not os.path.exists(new_path):
+    #         os.makedirs(new_path)
+    #     data = load_ds(os.path.join(root, path, f'{i}.pkl'))
+    #     data = (data - m) / s
+    #     with open(os.path.join(new_path, f'{i}.pkl'), 'wb') as fout:
+    #         pickle.dump(data, fout)
 
 
 def data_processing(folder):
@@ -46,6 +46,8 @@ def data_processing(folder):
         data = load_ds(f'{folder}/{i}.pkl')[:,:,:2]
         min_vals = np.min(data, axis=(0, 1))
         max_vals = np.max(data, axis=(0, 1))
+
+        print(i, min_vals, max_vals)
 
         data = (data - min_vals) / (max_vals - min_vals)
         img = Image.new('L', (W, W))
@@ -68,8 +70,9 @@ def main():
     #     data_processing(folder)
 
     
-    for p in path:
-        normalize_all('./new_3d', p, './new_3d_normalized')
+    # for p in path:
+    #     normalize_all('./new_3d', p, './new_3d_normalized')
+    data_processing('./real_pass/mixed')
 
 
 if __name__ == '__main__':

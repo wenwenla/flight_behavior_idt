@@ -49,12 +49,33 @@ class FBImageDataset(Dataset):
     def __getitem__(self, idx):
         L = (self.rb - self.lb)
         label = idx // L
-        bn = ['cppds', 'defenseds2', 'flockingds', 'formation', 'hideds', 'leaderfollowers_3d', 'lineds', 'pass3d', 'patrol', 'poi', 'treesds2'][label]
+        bn = ['cppds', 'defenseds2', 'flockingds', 'formation', 'hideds', 'leaderfollowers_3d', 'lineds',
+         'patrol', 'pass3d', 'poi', 'treesds2'][label]
         pkl_index = idx %  L + self.lb
         fn = f'./new_3d/{bn}/{pkl_index}.jpg'
         image = read_image(fn)
         if self.transform:
             image = self.transform(image)
+        return image, label
+
+
+class MixedImageDataset(Dataset):
+
+    def __init__(self, root_path, label, transform=None) -> None:
+        super().__init__()
+        self.transform = transform
+        self.root_path = root_path
+        self.label = label
+
+    def __len__(self):
+        return 100
+
+    def __getitem__(self, index):
+        fn = os.path.join(self.root_path, f'{index}.jpg')
+        image = read_image(fn)
+        if self.transform:
+            image = self.transform(image)
+        label = self.label
         return image, label
 
 
@@ -146,6 +167,38 @@ def evaluation():
     print(m)
 
 
+def eval_real_data():
+    transformer = Compose([
+        ConvertImageDtype(torch.float),
+        Normalize(0, 1),
+    ])
+    ds = MixedImageDataset('real_pass/mixed', 7, transformer)
+    ds_loader = DataLoader(ds, 100)
+    net = CNNModule().to(DEVICE)
+    net.load_state_dict(torch.load(f'./state_dict_img/model_EP4.sd'))
+
+    pred = []
+    real_label = []
+    for d in ds_loader:
+        images, labels = d
+        images = images.to(DEVICE)
+        labels = labels.to(DEVICE)
+        with torch.no_grad():
+            output = net(images)
+            _, predicted = torch.max(output, 1)
+
+        pred.extend(predicted.cpu().numpy())
+        real_label.extend(labels.cpu().numpy())
+    print(f'==========result===========')
+    m = classification_report(real_label, pred)
+    print(m)
+    print(f'===========================')
+
+    m = confusion_matrix(real_label, pred)
+    print(m)
+
+
 if __name__ == '__main__':
     main()
     evaluation()
+    # eval_real_data()

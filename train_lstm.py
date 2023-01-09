@@ -1,3 +1,4 @@
+import os
 import pickle
 import random
 import sys
@@ -54,6 +55,32 @@ class FBDataSet(Dataset):
         L_S = np.random.randint(0, data.shape[0] - self.split_index - 1)
         data = data[L_S:L_S + self.split_index, :10, :].reshape(-1, 30)
         return data.astype('float32'), label
+
+
+class MixedSeqDataset(Dataset):
+
+    def __init__(self, root_path, label, split_index, mean_std) -> None:
+        super().__init__()
+        self.root_path = root_path
+        self.label = label
+        self.split_index = split_index
+        self.mean_std = mean_std
+
+    def __len__(self):
+        return 100
+
+    def __getitem__(self, index):
+        fn = os.path.join(self.root_path, f'{index}.pkl')
+        with open(fn, 'rb') as fin:
+            data = pickle.load(fin)
+        mean = self.mean_std[0]
+        std = self.mean_std[1]
+        data = (data - mean) / std
+        L_S = np.random.randint(0, data.shape[0] - self.split_index - 1)
+        data = data[L_S:L_S + self.split_index, :10, :].reshape(-1, 30)
+        label = self.label
+        return data.astype('float32'), label
+
 
 
 def setup_seed(seed):
@@ -144,6 +171,37 @@ def evaluation():
     print(m)
 
 
+def eval_real_data():
+    N = 15
+    mean = [8.07585196, 4.89015749, 1.07418603] 
+    std = [3.85663151, 1.94566411, 0.34342566]
+    ds_eval = MixedSeqDataset('real_pass/mixed', 8, N, [mean, std])
+    ds_loader = DataLoader(ds_eval, 100)
+    net = RNN().to(DEVICE)
+    net.load_state_dict(torch.load(f'./state_dict_{N}/model_EP99_{N}.sd'))
+    pred = []
+    real_label = []
+    for d in ds_loader:
+        images, labels = d
+        images = images.to(DEVICE)
+        labels = labels.to(DEVICE)
+        with torch.no_grad():
+            output = net(images)
+            _, predicted = torch.max(output, 1)
+
+        pred.extend(predicted.cpu().numpy())
+        real_label.extend(labels.cpu().numpy())
+    
+    print(f'==========result===========')
+    m = classification_report(real_label, pred)
+    print(m)
+    print(f'===========================')
+
+    m = confusion_matrix(real_label, pred)
+    print(m)
+
+
 if __name__ == '__main__':
-    main()
-    evaluation()
+    # main()
+    # evaluation()
+    eval_real_data()
