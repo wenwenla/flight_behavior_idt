@@ -137,6 +137,7 @@ def main():
 
 
 def evaluation():
+    setup_seed(19971023)
     transformer = Compose([
         ConvertImageDtype(torch.float),
         Normalize(0, 1),
@@ -168,6 +169,7 @@ def evaluation():
 
 
 def eval_real_data():
+    setup_seed(19971023)
     transformer = Compose([
         ConvertImageDtype(torch.float),
         Normalize(0, 1),
@@ -199,6 +201,6 @@ def eval_real_data():
 
 
 if __name__ == '__main__':
-    main()
-    evaluation()
-    # eval_real_data()
+    # main()
+    # evaluation()
+    eval_real_data()

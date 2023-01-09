@@ -144,6 +144,7 @@ def main():
 
 
 def evaluation():
+    setup_seed(19971023)
     N = 15
     ds_eval = FBDataSet(N, 8000, 10000)
     ds_loader = DataLoader(ds_eval, 2000 * 10)
@@ -172,6 +173,7 @@ def evaluation():
 
 
 def eval_real_data():
+    setup_seed(19971023)
     N = 15
     mean = [8.07585196, 4.89015749, 1.07418603] 
     std = [3.85663151, 1.94566411, 0.34342566]
